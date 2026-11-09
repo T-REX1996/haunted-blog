@@ -7,11 +7,15 @@ class Blog < ApplicationRecord
 
   validates :title, :content, presence: true
 
-  scope :published, -> { where('secret = FALSE') }
+  scope :published, -> { where(secret: false) }
 
   scope :search, lambda { |term|
     pattern = "%#{sanitize_sql_like(term.to_s)}%"
     where('title LIKE :pattern OR content LIKE :pattern', pattern:)
+  }
+
+  scope :visible_to, lambda { |user|
+    published.or(where(user:))
   }
 
   scope :default_order, -> { order(id: :desc) }
